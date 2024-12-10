@@ -33,12 +33,10 @@ contract EvenNumberTest is RiscZeroCheats, Test {
     }
 
     function test_SetEven() public {
-        bytes memory t = "/home/mmt/src/risc0-foundry-template/tests/res/data.json";
+        // bytes memory t = "/home/mmt/src/risc0-foundry-template/tests/res/data.json";
+        bytes memory t = "{\"name\": \"John Doe\",\"age\": 23}";
 
         (bytes memory journal, bytes memory seal) = prove(Elf.IS_EVEN_PATH, abi.encode(t));
-
-        // uint256 number = 12345678;
-        // (bytes memory journal, bytes memory seal) = prove(Elf.IS_EVEN_PATH, abi.encode(number));
 
         evenNumber.set(abi.decode(journal, (bytes)), seal);
         assertEq(evenNumber.get(), 1);

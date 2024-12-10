@@ -13,8 +13,7 @@
 // limitations under the License.
 
 use std::io::Read;
-
-use alloy_primitives::B512;
+use std::fs;
 use alloy_sol_types::SolValue;
 use risc0_zkvm::guest::env;
 use serde_json::json;
@@ -55,25 +54,27 @@ fn main() {
     env::stdin().read_to_end(&mut input_bytes).unwrap();
     
     let filename = "/home/mmt/src/risc0-foundry-template/tests/res/data.json";
-    let mut datastr = include_str!("/home/mmt/src/risc0-foundry-template/tests/res/data.json");
-    let d : serde_json::Value  = serde_json::from_str(&datastr).unwrap();
-    let data = json!(&d);
+    // let mut datastr = include_str!("/home/mmt/src/risc0-foundry-template/tests/res/data.json");
+    // let d : serde_json::Value  = serde_json::from_str(&datastr).unwrap();
+    // let data = json!(&d);
 
     // remove leading & trailing 0 in input_bytes
     let mut vec = input_bytes.clone();
 
-    // remove leading character until / (=47)
-    if let Some(pos) = vec.iter().position(|&x| x == 47) {
+    // remove leading character until / (=47) { (=123)
+    if let Some(pos) = vec.iter().position(|&x| x == 123) {
         vec.drain(0..=pos-1);
     }
     let elem = 0; // element to remove
     vec.retain(|x| *x != elem);
 
-    // vec.remove(0);
-    // vec.remove(0);
+    let mut jsonstr = String::from_utf8(vec).expect("can not parse env input to string");
 
-    let mut string = String::from_utf8(vec).expect("can not parse env input to string");
-    assert_eq!(&string, filename, "{}", format!("From ENV: {:?}", string));
+    // let content = "{\"name\": \"John Doe\",\"age\": 23}";
+    // assert_eq!(&string, content, "{}", format!("From ENV: {:?}", string))
+
+    let d : serde_json::Value  = serde_json::from_str(&jsonstr).unwrap();
+    let data = json!(&d);
 
     // Validate the data against the schema
     let result = compiled_schema.validate(&data);
@@ -87,7 +88,7 @@ fn main() {
     
     // Commit the journal that will be received by the application contract.
     // Journal is encoded using Solidity ABI for easy decoding in the app contract.
-    env::commit_slice(filename.abi_encode().as_slice());
+    env::commit_slice(jsonstr.abi_encode().as_slice());
 }
 
 /*
